@@ -4,8 +4,10 @@ resource "aws_subnet" "subnet-private-a" {
   availability_zone = "${var.region}a"
 
   tags = {
-    Owner                             = "${var.owner}"
+    Contact                           = "${var.contact}"
+    Project                           = "${var.project}"
     Name                              = "SubnetPrivateA"
+    Resource                          = "Network"
     "kubernetes.io/role/internal-elb" = "1"
     "kubernetes.io/cluster/demo"      = "owned"
   }
@@ -18,8 +20,10 @@ resource "aws_subnet" "subnet-public-a" {
   map_public_ip_on_launch = true
 
   tags = {
-    Owner                        = "${var.owner}"
+    Contact                      = "${var.contact}"
+    Project                      = "${var.project}"
     Name                         = "SubnetPublicA"
+    Resource                     = "Network"
     "kubernetes.io/role/elb"     = "1"
     "kubernetes.io/cluster/demo" = "owned"
   }
@@ -31,8 +35,10 @@ resource "aws_subnet" "subnet-private-b" {
   availability_zone = "${var.region}b"
 
   tags = {
-    Owner                             = "${var.owner}"
+    Contact                           = "${var.contact}"
+    Project                           = "${var.project}"
     Name                              = "SubnetPrivateB"
+    Resource                          = "Network"
     "kubernetes.io/role/internal-elb" = "1"
     "kubernetes.io/cluster/demo"      = "owned"
   }
@@ -45,8 +51,10 @@ resource "aws_subnet" "subnet-public-b" {
   map_public_ip_on_launch = true
 
   tags = {
-    Owner                        = "${var.owner}"
+    Contact                      = "${var.contact}"
+    Project                      = "${var.project}"
     Name                         = "SubnetPublicB"
+    Resource                     = "Network"
     "kubernetes.io/role/elb"     = "1"
     "kubernetes.io/cluster/demo" = "owned"
   }

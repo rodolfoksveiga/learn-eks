@@ -13,8 +13,10 @@ resource "aws_iam_role" "eks-nodes-role" {
   })
 
   tags = {
-    Owner = "${var.owner}"
-    Name  = "EksNodesRole"
+    Contact  = "${var.contact}"
+    Project  = "${var.project}"
+    Name     = "EksNodesRole"
+    Resource = "Eks"
   }
 }
 
@@ -67,7 +69,9 @@ resource "aws_eks_node_group" "eks-nodes-private" {
   ]
 
   tags = {
-    Owner = "${var.owner}"
-    Name  = "EksNodesPrivate"
+    Contact  = "${var.contact}"
+    Project  = "${var.project}"
+    Name     = "EksNodesPrivate"
+    Resource = "Eks"
   }
 }

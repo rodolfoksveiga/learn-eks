@@ -2,8 +2,10 @@ resource "aws_internet_gateway" "internet-gateway" {
   vpc_id = aws_vpc.vpc.id
 
   tags = {
-    Owner = "${var.owner}"
-    Name  = "InternetGateway"
+    Contact  = "${var.contact}"
+    Project  = "${var.project}"
+    Name     = "InternetGateway"
+    Resource = "Gateway"
   }
 }
 
@@ -11,8 +13,9 @@ resource "aws_eip" "eip" {
   vpc = true
 
   tags = {
-    Owner = "${var.owner}"
-    Name  = "Eip"
+    Contact = "${var.contact}"
+    Project = "${var.project}"
+    Name    = "Eip"
   }
 }
 
@@ -21,8 +24,10 @@ resource "aws_nat_gateway" "nat-gateway" {
   subnet_id     = aws_subnet.subnet-public-a.id
 
   tags = {
-    Owner = "${var.owner}"
-    Name  = "NatGateway"
+    Contact  = "${var.contact}"
+    Project  = "${var.project}"
+    Name     = "NatGateway"
+    Resource = "Gateway"
   }
 
   depends_on = [aws_internet_gateway.internet-gateway]

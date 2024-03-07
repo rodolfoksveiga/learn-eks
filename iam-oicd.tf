@@ -6,4 +6,11 @@ resource "aws_iam_openid_connect_provider" "oidc-provider" {
   client_id_list  = ["sts.amazonaws.com"]
   thumbprint_list = [data.tls_certificate.eks.certificates[0].sha1_fingerprint]
   url             = aws_eks_cluster.eks-cluster.identity[0].oidc[0].issuer
+
+  tags = {
+    Contact  = "${var.contact}"
+    Project  = "${var.project}"
+    Name     = "OidcProvider"
+    Resource = "Iam"
+  }
 }

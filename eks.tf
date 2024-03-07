@@ -13,8 +13,10 @@ resource "aws_iam_role" "eks-cluster-role" {
   })
 
   tags = {
-    Owner = "${var.owner}"
-    Name  = "EksClusterRole"
+    Contact  = "${var.contact}"
+    Project  = "${var.project}"
+    Name     = "EksClusterRole"
+    Resource = "Eks"
   }
 }
 
@@ -40,7 +42,9 @@ resource "aws_eks_cluster" "eks-cluster" {
   depends_on = [aws_iam_role_policy_attachment.eks-cluster-role-policy-attachment]
 
   tags = {
-    Owner = "${var.owner}"
-    Name  = "EksCluster"
+    Contact = "${var.contact}"
+    Project = "${var.project}"
+    Name    = "EksCluster"
+    Resouce = "Eks"
   }
 }

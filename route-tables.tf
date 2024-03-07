@@ -20,8 +20,10 @@ resource "aws_route_table" "private-route-table" {
   ]
 
   tags = {
-    Owner = "${var.owner}"
-    Name  = "RouteTablePrivate"
+    Contact  = "${var.contact}"
+    Project  = "${var.project}"
+    Name     = "RouteTablePrivate"
+    Resource = "Network"
   }
 }
 
@@ -47,8 +49,10 @@ resource "aws_route_table" "public-route-table" {
   ]
 
   tags = {
-    Owner = "${var.owner}"
-    Name  = "RouteTablePublic"
+    Contact  = "${var.contact}"
+    Project  = "${var.project}"
+    Name     = "RouteTablePublic"
+    Resource = "Network"
   }
 }
 
