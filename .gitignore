@@ -17,3 +17,5 @@ override.tf.json
 
 .terraformrc
 terraform.rc
+
+k8s/**

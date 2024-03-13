@@ -1,82 +1,45 @@
-resource "aws_db_subnet_group" "db-subnet-group" {
-  name = "rodox-db-subnet-group"
+module "rds" {
+  source  = "terraform-aws-modules/rds/aws"
+  version = "~> 6.5"
 
-  subnet_ids = [
-    aws_subnet.subnet-private-a.id,
-    aws_subnet.subnet-private-b.id
-  ]
+  identifier = "${var.owner}-rds-instance"
 
-  tags = {
-    Contact  = "${var.contact}"
-    Project  = "${var.project}"
-    Name     = "DbSecurityGroup"
-    Resource = "Rds"
-  }
-}
+  family               = "mysql8.0"
+  engine               = "mysql"
+  engine_version       = "8.0"
+  major_engine_version = "8.0"
 
-resource "aws_security_group" "rds-security-group" {
-  vpc_id = aws_vpc.vpc.id
+  instance_class    = "db.t3.micro"
+  allocated_storage = 5
 
-  ingress {
-    description = "Ingress All"
-    from_port   = 3306
-    to_port     = 3306
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  # connect to mysql with the following command
+  ## docker
+  ### docker run -it --rm --name mysql mysql:8.0 mysql -h ${DB_ENDPOINT} -D shopware -u admin -p
+  ## kubernetes
+  ### kubectl run temp-pod --image mysql:8.0 -it --rm --restart=Never -- /bin/bash
+  ### mysql -h ${DB_ENDPOINT} -D shopware -u admin -p
+  db_name  = "shopware"
+  username = "admin"
+  port     = "3306"
 
-  egress {
-    description = "Egress All"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  iam_database_authentication_enabled = true
 
-  tags = {
-    Contact  = "${var.contact}"
-    Project  = "${var.project}"
-    Name     = "RdsSecurityGroup"
-    Resource = "Rds"
-  }
-}
+  vpc_security_group_ids = [module.rds_security_group.security_group_id]
+  db_subnet_group_name   = module.vpc.database_subnet_group
+  multi_az               = false
 
-## create rds instance
-resource "aws_db_instance" "rds-instance" {
-  identifier = "rds-instance"
+  create_db_parameter_group = false
 
-  engine         = "mysql"
-  engine_version = "5.7"
-  instance_class = "db.t3.micro"
-
-  storage_type            = "gp2"
-  allocated_storage       = 20
-  max_allocated_storage   = 1000
+  backup_retention_period = 1
   skip_final_snapshot     = true
-  backup_retention_period = 7
   deletion_protection     = false
 
-  db_subnet_group_name   = aws_db_subnet_group.db-subnet-group.name
-  vpc_security_group_ids = [aws_security_group.rds-security-group.id]
-  multi_az               = false
-  publicly_accessible    = false
-
-  # connect to the database with the following command
-  ## docker run -it --rm --name rds-instance mysql:8.0 mysql -h ${DB_ENDPOINT} -D mydb -u admin -p
-  name                 = "mydb"
-  username             = "admin"
-  password             = "password"
-  parameter_group_name = "default.mysql5.7"
+  create_cloudwatch_log_group     = true
+  enabled_cloudwatch_logs_exports = ["error"]
 
   tags = {
-    Contact  = "${var.contact}"
-    Project  = "${var.project}"
-    Name     = "RdsInstance"
-    Resource = "Rds"
+    Name        = "Instance"
+    Module      = "Rds"
+    Environment = var.env
   }
-}
-
-output "rodox-rds-instance-endpoint" {
-  description = "RDS Instance Endpoint"
-  value       = aws_db_instance.rds-instance.endpoint
 }

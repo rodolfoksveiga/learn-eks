@@ -1,50 +1,36 @@
-resource "aws_iam_role" "eks-cluster-role" {
-  name = "CustomEksClusterRole"
+module "eks" {
+  source  = "terraform-aws-modules/eks/aws"
+  version = "~> 20.8"
 
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Effect = "Allow"
-      Action = "sts:AssumeRole"
-      Principal = {
-        Service = "eks.amazonaws.com"
-      }
-    }]
-  })
+  cluster_name    = "${var.owner}-eks-cluster"
+  cluster_version = "1.29"
 
-  tags = {
-    Contact  = "${var.contact}"
-    Project  = "${var.project}"
-    Name     = "EksClusterRole"
-    Resource = "Eks"
-  }
-}
+  vpc_id     = module.vpc.vpc_id
+  subnet_ids = module.vpc.public_subnets
 
-resource "aws_iam_role_policy_attachment" "eks-cluster-role-policy-attachment" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
-  role       = aws_iam_role.eks-cluster-role.name
-}
+  cluster_endpoint_public_access = true
 
-resource "aws_eks_cluster" "eks-cluster" {
-  name     = "EksCluster"
-  role_arn = aws_iam_role.eks-cluster-role.arn
-
-  vpc_config {
-    subnet_ids = [
-      aws_subnet.subnet-private-a.id,
-      aws_subnet.subnet-public-a.id,
-      aws_subnet.subnet-private-b.id,
-      aws_subnet.subnet-public-b.id
-
-    ]
+  eks_managed_node_group_defaults = {
+    instance_types = ["t3.medium"]
   }
 
-  depends_on = [aws_iam_role_policy_attachment.eks-cluster-role-policy-attachment]
+  eks_managed_node_groups = {
+    one = {
+      name = "${var.owner}-eks-node-group-1"
 
+      min_size     = 1
+      max_size     = 3
+      desired_size = 2
+
+      capacity_type  = "SPOT"
+      instance_types = ["t3.medium"]
+    }
+  }
+
+  enable_cluster_creator_admin_permissions = true
   tags = {
-    Contact = "${var.contact}"
-    Project = "${var.project}"
-    Name    = "EksCluster"
-    Resouce = "Eks"
+    Name        = "Cluster"
+    Module      = "Eks"
+    Environment = var.env
   }
 }

@@ -13,3 +13,12 @@ variable "project" {
   default = "Waschbaer"
 }
 
+variable "env" {
+  type    = string
+  default = "dev"
+}
+
+variable "owner" {
+  type    = string
+  default = "rodox"
+}

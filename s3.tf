@@ -1,12 +1,14 @@
-resource "aws_s3_bucket" "s3-bucket" {
-  bucket = "rodox-s3-bucket"
+module "s3_bucket" {
+  source  = "terraform-aws-modules/s3-bucket/aws"
+  version = "~> 4.1"
 
-  force_destroy = true
+  bucket = "${var.owner}-s3-bucket"
+  acl    = "private"
 
-  tags = {
-    Contact  = "${var.contact}"
-    Project  = "${var.project}"
-    Name     = "S3Bucket"
-    Resource = "S3"
+  control_object_ownership = true
+  object_ownership         = "ObjectWriter"
+
+  versioning = {
+    enabled = false
   }
 }
