@@ -22,3 +22,8 @@ variable "owner" {
   type    = string
   default = "rodox"
 }
+
+variable "stack" {
+  type    = string
+  default = "aws"
+}

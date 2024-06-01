@@ -5,10 +5,26 @@ module "eks" {
   cluster_name    = "${var.owner}-eks-cluster"
   cluster_version = "1.29"
 
-  vpc_id     = module.vpc.vpc_id
-  subnet_ids = module.vpc.public_subnets
+  vpc_id                   = module.vpc.vpc_id
+  subnet_ids               = module.vpc.private_subnets
+  control_plane_subnet_ids = module.vpc.private_subnets
 
-  cluster_endpoint_public_access = true
+  cluster_endpoint_public_access  = true
+  cluster_endpoint_private_access = true
+
+  create_cloudwatch_log_group = false
+
+  cluster_addons = {
+    coredns = {
+      most_recent = true
+    }
+    kube-proxy = {
+      most_recent = true
+    }
+    vpc-cni = {
+      most_recent = true
+    }
+  }
 
   eks_managed_node_group_defaults = {
     instance_types = ["t3.medium"]
@@ -28,6 +44,7 @@ module "eks" {
   }
 
   enable_cluster_creator_admin_permissions = true
+
   tags = {
     Name        = "Cluster"
     Module      = "Eks"

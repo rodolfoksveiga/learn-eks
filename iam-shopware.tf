@@ -1,6 +1,10 @@
+locals {
+  shopware_service_account_name = "shopware-service-account"
+}
+
 data "aws_caller_identity" "current" {}
 
-resource "aws_iam_role" "shopware-role" {
+resource "aws_iam_role" "shopware" {
   name = "ShopwareRole"
 
   assume_role_policy = jsonencode({
@@ -10,7 +14,7 @@ resource "aws_iam_role" "shopware-role" {
       Action = "sts:AssumeRoleWithWebIdentity"
       Condition = {
         StringEquals = {
-          "${replace(module.eks.cluster_oidc_issuer_url, "https://", "")}:sub" = "system:serviceaccount:default:shopware-service-account"
+          "${replace(module.eks.cluster_oidc_issuer_url, "https://", "")}:sub" = "system:serviceaccount:default:${local.shopware_service_account_name}"
         }
       }
       Principal = {
@@ -25,7 +29,7 @@ resource "aws_iam_role" "shopware-role" {
   }
 }
 
-resource "aws_iam_policy" "s3-all-policy" {
+resource "aws_iam_policy" "shopware" {
   name = "S3AllPolicy"
 
   policy = jsonencode({
@@ -40,17 +44,17 @@ resource "aws_iam_policy" "s3-all-policy" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "shopware-role-s3-policy-attachment" {
-  role       = aws_iam_role.shopware-role.name
-  policy_arn = aws_iam_policy.s3-all-policy.arn
+resource "aws_iam_role_policy_attachment" "shopware" {
+  role       = aws_iam_role.shopware.name
+  policy_arn = aws_iam_policy.shopware.arn
 }
 
-resource "kubernetes_service_account" "shopware-k8s-service-account" {
+resource "kubernetes_service_account" "shopware" {
   metadata {
-    name      = "shopware-service-account"
+    name      = local.shopware_service_account_name
     namespace = "default"
     annotations = {
-      "eks.amazonaws.com/role-arn" = aws_iam_role.shopware-role.arn
+      "eks.amazonaws.com/role-arn" = aws_iam_role.shopware.arn
     }
   }
 }

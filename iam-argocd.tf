@@ -18,7 +18,7 @@ resource "aws_iam_role" "argocd-role" {
   })
 
   tags = {
-    Name     = "BackendRole"
+    Name     = "ArgoCdRole"
     Resource = "Iam"
   }
 }

@@ -1,3 +1,7 @@
+locals {
+  external_secrets_service_account_name = "external-secrets-service-account"
+}
+
 data "aws_secretsmanager_secret" "rds-secrets" {
   arn = module.rds.db_instance_master_user_secret_arn
 
@@ -101,7 +105,7 @@ resource "aws_iam_role_policy_attachment" "secrets-read" {
 
 resource "kubernetes_service_account" "external-secrets" {
   metadata {
-    name      = "external-secrets-service-account"
+    name      = local.external_secrets_service_account_name
     namespace = "default"
     annotations = {
       "eks.amazonaws.com/role-arn" = aws_iam_role.external-secrets.arn
@@ -110,6 +114,8 @@ resource "kubernetes_service_account" "external-secrets" {
 }
 
 resource "kubernetes_manifest" "secret-store" {
+  count = var.stack == "all" || var.stack == "k8s" ? 1 : 0
+
   manifest = {
     apiVersion = "external-secrets.io/v1beta1"
     kind       = "SecretStore"
@@ -125,7 +131,7 @@ resource "kubernetes_manifest" "secret-store" {
           auth = {
             jwt = {
               serviceAccountRef = {
-                name = kubernetes_service_account.external-secrets.metadata[0].name
+                name = local.external_secrets_service_account_name
               }
             }
             # secretRef = {
@@ -145,12 +151,15 @@ resource "kubernetes_manifest" "secret-store" {
   }
 
   # TODO: it still doesn't wait for the helm release installation
+  ## HACK: use variable to create services only after helm release is installed
   depends_on = [
     helm_release.external-secrets
   ]
 }
 
 resource "kubernetes_manifest" "rds-secrets" {
+  count = var.stack == "all" || var.stack == "k8s" ? 1 : 0
+
   manifest = {
     apiVersion = "external-secrets.io/v1beta1"
     kind       = "ExternalSecret"
@@ -187,6 +196,7 @@ resource "kubernetes_manifest" "rds-secrets" {
   }
 
   depends_on = [
+    helm_release.external-secrets,
     kubernetes_manifest.secret-store
   ]
 }
